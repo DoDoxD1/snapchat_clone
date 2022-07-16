@@ -44,21 +44,6 @@
             android:scaleType="centerInside"
             android:src="@drawable/camera_white" />
 
-
-        <ImageButton
-            android:id="@+id/openActivity"
-
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentStart="false"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:scaleType="centerInside"
-            android:src="@drawable/open_new_activity" />
-
         <ImageButton
             android:id="@+id/previousMask"
             android:layout_width="50dp"
@@ -175,7 +160,7 @@
             android:elegantTextHeight="true"
             android:fadingEdgeLength="56dp"
             android:requiresFadingEdge="vertical"
-            android:text="  Screenshot  "
+            android:text="  Photo  "
             android:textAlignment="center" />
 
         <TextView
@@ -190,7 +175,7 @@
             android:elegantTextHeight="true"
             android:fadingEdgeLength="32dp"
             android:requiresFadingEdge="horizontal"
-            android:text="  Record  "
+            android:text="  Video  "
             android:textAlignment="center" />
 
 

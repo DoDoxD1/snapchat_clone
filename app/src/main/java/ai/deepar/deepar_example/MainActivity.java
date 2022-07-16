@@ -203,19 +203,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         });
 
-        ImageButton openActivity = findViewById(R.id.openActivity);
-        openActivity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity.this, BasicActivity.class);
-                MainActivity.this.startActivity(myIntent);
-            }
-
-
-        });
-
-
-
         final TextView screenShotModeButton = findViewById(R.id.screenshotModeButton);
         final TextView recordModeBtn = findViewById(R.id.recordModeButton);
 
@@ -378,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
     private void initializeDeepAR() {
         deepAR = new DeepAR(this);
-        deepAR.setLicenseKey("your_license_key_here");
+        deepAR.setLicenseKey("f8d116e0714154e87a79079ebe0e184069059484cbf6342e3e0b8e3a707faa8b2db1e5e0cd6dad1a");
         deepAR.initialize(this, this);
         setupCamera();
     }
