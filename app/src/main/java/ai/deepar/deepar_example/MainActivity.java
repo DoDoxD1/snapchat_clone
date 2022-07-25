@@ -10,24 +10,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
@@ -37,7 +31,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -47,7 +40,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -266,7 +258,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                                 Date date = new Date();
                                 CharSequence format = android.text.format.DateFormat.format("yyyy_MM_dd_hh_mm_ss", date);
                                 String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-                                File file = new File(root+"/Readymotive/Videos");
+                                File file = new File(root+"/Pictures/Readymotive/Videos");
+//                                File file = new File(getExternalFilesDir(null).getParent(),"Readymotive");
                                 try {
                                     if (!file.exists()) {
                                         file.mkdirs();
@@ -641,7 +634,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Date date = new Date();
         CharSequence format = android.text.format.DateFormat.format("yyyy_MM_dd_hh_mm_ss", date);
         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-        File file = new File(root+"/Readymotive");
+        File file = new File(root+"/Pictures/Readymotive");
         try {
             if (!file.exists()) {
                 file.mkdirs();
