@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private int screenOrientation;
 
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+
     ArrayList<String> masks;
     ArrayList<String> effects;
     ArrayList<String> filters;
@@ -90,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     protected void onStart() {
+        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -247,9 +253,32 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         public void onClick(View v) {
                             if(recording) {
                                 deepAR.stopVideoRecording();
+                                try {
+                                    FileOutputStream outputStream = new FileOutputStream(videoFileName);
+                                    outputStream.flush();
+                                    outputStream.close();
+                                    Log.i("aunu", "onClick: saved");
+                                }
+                                catch (Exception e){
+                                    Log.i("aunu", "onClick: "+e);
+                                }
                                 Toast.makeText(getApplicationContext(), "Recording " + videoFileName.getName() + " saved.", Toast.LENGTH_LONG).show();
                             } else {
-                                videoFileName = new File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "video_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date()) + ".mp4");
+                                Date date = new Date();
+                                CharSequence format = android.text.format.DateFormat.format("yyyy_MM_dd_hh_mm_ss", date);
+                                String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+                                File file = new File(root+"/Readymotive/Videos");
+                                try {
+                                    if (!file.exists()) {
+                                        file.mkdirs();
+                                    }
+                                }
+                                catch(Exception e){
+                                    Log.w("creating file error", e.toString());
+                                }
+                                String filename = format+".mp4";
+                                videoFileName = new File(file,filename);
+//                                videoFileName = new File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "video_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date()) + ".mp4");
                                 deepAR.startVideoRecording(videoFileName.toString(), width/2, height/2);
                                 Toast.makeText(getApplicationContext(), "Recording started.", Toast.LENGTH_SHORT).show();
                             }
@@ -555,17 +584,29 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void screenshotTaken(Bitmap bitmap) {
-        CharSequence now = DateFormat.format("yyyy_MM_dd_hh_mm_ss", new Date());
+        Date date = new Date();
+        CharSequence format = android.text.format.DateFormat.format("yyyy_MM_dd_hh_mm_ss", date);
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        File file = new File(root+"/Readymotive");
         try {
-            File imageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "image_" + now + ".jpg");
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            int quality = 100;
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-            outputStream.flush();
-            outputStream.close();
-            MediaScannerConnection.scanFile(MainActivity.this, new String[]{imageFile.toString()}, null, null);
-            Toast.makeText(MainActivity.this, "Screenshot " + imageFile.getName() + " saved.", Toast.LENGTH_SHORT).show();
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        }
+        catch(Exception e){
+            Log.w("creating file error", e.toString());
+        }
+        String filename = format+".jpg";
+        File myFile = new File(file,filename);
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(myFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,fileOutputStream);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
         } catch (Throwable e) {
+            Toast.makeText(this, "error"+e, Toast.LENGTH_SHORT).show();
+            Log.i("aunu", "screenshotTaken: "+e);
             e.printStackTrace();
         }
 
