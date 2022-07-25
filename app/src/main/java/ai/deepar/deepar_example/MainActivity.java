@@ -12,6 +12,9 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -19,8 +22,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,6 +44,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
@@ -252,16 +259,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         @Override
                         public void onClick(View v) {
                             if(recording) {
+                                saveVideo();
                                 deepAR.stopVideoRecording();
-                                try {
-                                    FileOutputStream outputStream = new FileOutputStream(videoFileName);
-                                    outputStream.flush();
-                                    outputStream.close();
-                                    Log.i("aunu", "onClick: saved");
-                                }
-                                catch (Exception e){
-                                    Log.i("aunu", "onClick: "+e);
-                                }
+//                                try {
+//                                    FileOutputStream outputStream = new FileOutputStream(videoFileName);
+//                                    outputStream.flush();
+//                                    outputStream.close();
+//                                    Log.i("aunu", "onClick: saved");
+//                                }
+//                                catch (Exception e){
+//                                    Log.i("aunu", "onClick: "+e);
+//                                }
                                 Toast.makeText(getApplicationContext(), "Recording " + videoFileName.getName() + " saved.", Toast.LENGTH_LONG).show();
                             } else {
                                 Date date = new Date();
@@ -330,6 +338,61 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         });
     }
+
+    private void saveVideo() {
+        Context context = MainActivity.this;
+//        String videoFileName = "video_" + System.currentTimeMillis() + ".mp4";
+
+        ContentValues valuesvideos;
+        valuesvideos = new ContentValues();
+        valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/");
+        valuesvideos.put(MediaStore.Video.Media.TITLE, String.valueOf(videoFileName));
+        valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, String.valueOf(videoFileName));
+        valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+        valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+        valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
+        valuesvideos.put(MediaStore.Video.Media.IS_PENDING, 1);
+        ContentResolver resolver = context.getContentResolver();
+        Uri collection = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY); //all video files on primary external storage
+        Uri uriSavedVideo = resolver.insert(collection, valuesvideos);
+
+        ParcelFileDescriptor pfd;
+
+        try {
+            pfd = context.getContentResolver().openFileDescriptor(uriSavedVideo,"w");
+
+            assert pfd != null;
+            FileOutputStream out = new FileOutputStream(pfd.getFileDescriptor());
+
+            // Get the already saved video as fileinputstream from here
+            InputStream in = getContentResolver().openInputStream(Uri.fromFile(videoFileName));
+
+
+            byte[] buf = new byte[8192];
+
+            int len;
+            int progress = 0;
+            while ((len = in.read(buf)) > 0) {
+                progress = progress + len;
+
+                out.write(buf, 0, len);
+            }
+            out.close();
+            in.close();
+            pfd.close();
+            valuesvideos.clear();
+            valuesvideos.put(MediaStore.Video.Media.IS_PENDING, 0);
+            valuesvideos.put(MediaStore.Video.Media.IS_PENDING, 0); //only your app can see the files until pending is turned into 0
+
+            context.getContentResolver().update(uriSavedVideo, valuesvideos, null, null);
+//            File file = new File(videoFileName);
+
+        } catch (Exception e) {
+            Log.i("aunu", "saveVideo: "+e);
+            e.printStackTrace();
+        }
+    }
+
     /*
             get interface orientation from
             https://stackoverflow.com/questions/10380989/how-do-i-get-the-current-orientation-activityinfo-screen-orientation-of-an-a/10383164
