@@ -216,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         });
 
-        final TextView screenShotModeButton = findViewById(R.id.screenshotModeButton);
-        final TextView recordModeBtn = findViewById(R.id.recordModeButton);
+        final ImageButton screenShotModeButton = findViewById(R.id.screenshotModeButton);
+        final ImageButton recordModeBtn = findViewById(R.id.recordModeButton);
 
         recordModeBtn.getBackground().setAlpha(0x00);
         screenShotModeButton.getBackground().setAlpha(0xA0);
@@ -261,15 +261,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                             if(recording) {
                                 saveVideo();
                                 deepAR.stopVideoRecording();
-//                                try {
-//                                    FileOutputStream outputStream = new FileOutputStream(videoFileName);
-//                                    outputStream.flush();
-//                                    outputStream.close();
-//                                    Log.i("aunu", "onClick: saved");
-//                                }
-//                                catch (Exception e){
-//                                    Log.i("aunu", "onClick: "+e);
-//                                }
                                 Toast.makeText(getApplicationContext(), "Recording " + videoFileName.getName() + " saved.", Toast.LENGTH_LONG).show();
                             } else {
                                 Date date = new Date();
