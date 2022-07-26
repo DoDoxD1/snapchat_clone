@@ -25,6 +25,8 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -83,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private int height = 0;
 
     private File videoFileName;
+
+    SwipeListener swipeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         final RadioButton radioFilters = findViewById(R.id.filters);
 
         SurfaceView arView = findViewById(R.id.surface);
+
+        swipeListener = new SwipeListener(arView);
 
         arView.getHolder().addCallback(this);
 
@@ -562,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
     }
 
-    private void gotoPrevious() {
+    public void gotoPrevious() {
         if (activeFilterType == 0) {
             currentMask = (currentMask - 1 + masks.size()) % masks.size();
             deepAR.switchEffect("mask", getFilterPath(masks.get(currentMask)));
@@ -716,5 +722,49 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     public void effectSwitched(String s) {
 
+    }
+
+    public class SwipeListener implements View.OnTouchListener {
+        GestureDetector gestureDetector;
+
+        SwipeListener(View view) {
+            int threshold = 100;
+            int velocity_threshold = 100;
+
+            GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                    float xDiff = e2.getX() - e1.getX();
+                    float yDiff = e2.getY() - e1.getY();
+                    try {
+                        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                            if (Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold) {
+                                if (xDiff > 0) {
+                                    gotoPrevious();
+                                } else {
+                                    gotoNext();
+                                }
+                                return true;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.i("aunu", "onFling: " + e);
+                    }
+                    return false;
+                }
+            };
+            gestureDetector = new GestureDetector(listener);
+            view.setOnTouchListener(this);
+        }
+
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            return gestureDetector.onTouchEvent(motionEvent);
+        }
     }
 }
